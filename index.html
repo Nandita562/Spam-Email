@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Spam Email Classifier</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 50px;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            max-width: 600px;
+            margin: auto;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Email Spam Classifier 📨</h2>
+        <form id="emailForm">
+            <label for="emailText">Paste your email content below:</label><br>
+            <textarea id="emailText" name="emailText" placeholder="Type your email here..."></textarea><br>
+            <button type="submit">Classify</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById("emailForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const emailContent = document.getElementById("emailText").value.trim();
+
+            if (!emailContent) {
+                document.getElementById("result").textContent = "⚠️ Please enter some email content.";
+                return;
+            }
+
+            fetch("http://127.0.0.1:5000/predict", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ email: emailContent })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Server response not OK");
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById("result").textContent =
+                    "Prediction: " + (data.prediction === "spam" ? "🛑 SPAM" : "✅ Not Spam");
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById("result").textContent = "❌ Prediction failed. Check backend status.";
+            });
+        });
+    </script>
+</body>
+</html>
